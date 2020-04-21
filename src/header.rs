@@ -181,16 +181,14 @@ impl Header {
     {
         writer.write_i16::<LittleEndian>(self.old_song_length)?;
         if format.version() > 0 {
-            writer.write_i8(self.version_number.ok_or(NbsError::InvalidTargetFormat)?)?;
+            writer.write_i8(self.version_number.ok_or(NbsError::InvalidFormat)?)?;
             writer.write_i8(
                 self.vannila_instrument_count
-                    .ok_or(NbsError::InvalidTargetFormat)?,
+                    .ok_or(NbsError::InvalidFormat)?,
             )?;
         }
         if format.version() >= 3 {
-            writer.write_i16::<LittleEndian>(
-                self.song_length.ok_or(NbsError::InvalidTargetFormat)?,
-            )?;
+            writer.write_i16::<LittleEndian>(self.song_length.ok_or(NbsError::InvalidFormat)?)?;
         }
         writer.write_i16::<LittleEndian>(self.layer_count)?;
         writer.write_string(&self.song_name)?;
@@ -208,44 +206,52 @@ impl Header {
         writer.write_i32::<LittleEndian>(self.noteblocks_removed)?;
         writer.write_string(&self.imported_file_name)?;
         if format.version() > 0 {
-            writer.write_i8(if self.is_loop.ok_or(NbsError::InvalidTargetFormat)? {
+            writer.write_i8(if self.is_loop.ok_or(NbsError::InvalidFormat)? {
                 1
             } else {
                 0
             })?;
-            writer.write_i8(self.max_loop_count.ok_or(NbsError::InvalidTargetFormat)?)?;
-            writer.write_i16::<LittleEndian>(
-                self.loop_start_tick.ok_or(NbsError::InvalidTargetFormat)?,
-            )?;
+            writer.write_i8(self.max_loop_count.ok_or(NbsError::InvalidFormat)?)?;
+            writer
+                .write_i16::<LittleEndian>(self.loop_start_tick.ok_or(NbsError::InvalidFormat)?)?;
         }
 
         Ok(())
     }
 
+    pub fn vannila_instrument_count(&self) -> Result<i8, NbsError> {
+        Ok(match self.format {
+            NbsFormat::NoteBlockStudio => 10,
+            NbsFormat::OpenNoteBlockStudio(_) => self
+                .vannila_instrument_count
+                .ok_or(NbsError::InvalidFormat)?,
+        })
+    }
+
     /// Returns the song ticks.
     /// This method will only return valid results for old versions and version 3 and 4 of the new version.
-    pub fn song_ticks(&self) -> Option<i16> {
-        match self.format {
+    pub fn song_ticks(&self) -> Result<Option<i16>, NbsError> {
+        Ok(match self.format {
             NbsFormat::NoteBlockStudio => Some(self.old_song_length),
             NbsFormat::OpenNoteBlockStudio(v) => {
                 if v >= 3 {
-                    Some(self.song_length.unwrap())
+                    Some(self.song_length.ok_or(NbsError::InvalidFormat)?)
                 } else {
                     None
                 }
             }
-        }
+        })
     }
 
     /// Returns the song Duration.
     /// This method will only return valid results for old versions and version 3 and 4 of the new version.
-    pub fn song_length(&self) -> Option<Duration> {
-        let song_ticks = self.song_ticks();
+    pub fn song_length(&self) -> Result<Option<Duration>, NbsError> {
+        let song_ticks = self.song_ticks()?;
         if song_ticks.is_none() {
-            return None;
+            return Ok(None);
         }
-        Some(Duration::from_secs_f32(
+        Ok(Some(Duration::from_secs_f32(
             song_ticks.unwrap() as f32 / (self.song_tempo as f32 / 100.0),
-        ))
+        )))
     }
 }

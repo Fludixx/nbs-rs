@@ -9,8 +9,8 @@ pub struct Layer {
     pub name: String,
     /// Only avabile in the new format version 4.
     pub locked: Option<bool>,
-    /// Only avabile in the new format since version 2.
-    pub volume: Option<i8>,
+    /// Layer volume.
+    pub volume: i8,
     /// Only avabile in the new format since version 2.
     pub stereo: Option<i8>,
     pub notes: HashMap<i16, Note>,
@@ -22,7 +22,7 @@ impl Layer {
         Layer {
             name: String::new(),
             locked: None,
-            volume: None,
+            volume: 100,
             stereo: None,
             notes: HashMap::new(),
         }
@@ -35,8 +35,8 @@ impl Layer {
         if format.version() >= 4 {
             layer.locked = Some(false);
         }
+        layer.volume = 100;
         if format.version() >= 2 {
-            layer.volume = Some(100);
             layer.stereo = Some(100);
         }
         layer

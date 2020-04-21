@@ -1,6 +1,6 @@
 [package]
 name = "nbs-rs"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["fludixx <fludixs@protonmail.com>"]
 edition = "2018"
 readme = "README.md"

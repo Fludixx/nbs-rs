@@ -1,23 +1,25 @@
-use crate::NbsError;
+use crate::{header::Header, NbsError};
+
+pub const PIANO: Instrument = Instrument::Vannila(0);
+pub const DOUBLE_BASS: Instrument = Instrument::Vannila(1);
+pub const BASS_DRUM: Instrument = Instrument::Vannila(2);
+pub const SNARE_DRUM: Instrument = Instrument::Vannila(3);
+pub const CLICK: Instrument = Instrument::Vannila(4);
+pub const GUITAR: Instrument = Instrument::Vannila(5);
+pub const FLUTE: Instrument = Instrument::Vannila(6);
+pub const BELL: Instrument = Instrument::Vannila(7);
+pub const CHIME: Instrument = Instrument::Vannila(8);
+pub const XYLOPHONE: Instrument = Instrument::Vannila(9);
+pub const IRON_XYLOPHONE: Instrument = Instrument::Vannila(10);
+pub const COW_BELL: Instrument = Instrument::Vannila(11);
+pub const DIDGERIDOO: Instrument = Instrument::Vannila(12);
+pub const BIT: Instrument = Instrument::Vannila(13);
+pub const BANJO: Instrument = Instrument::Vannila(14);
+pub const PLING: Instrument = Instrument::Vannila(15);
 
 #[derive(Debug, Clone, Copy)]
 pub enum Instrument {
-    Piano,
-    DoubleBass,
-    BassDrum,
-    SnareDrum,
-    Click,
-    Guitar,
-    Flute,
-    Bell,
-    Chime,
-    Xylophone,
-    IronXylophone,
-    CowBell,
-    Didgeridoo,
-    Bit,
-    Banjo,
-    Pling,
+    Vannila(i8),
     Custom(i8),
 }
 
@@ -33,47 +35,7 @@ impl Instrument {
 impl Into<i8> for Instrument {
     fn into(self) -> i8 {
         match self {
-            Instrument::Piano => 0,
-            Instrument::DoubleBass => 1,
-            Instrument::BassDrum => 2,
-            Instrument::SnareDrum => 3,
-            Instrument::Click => 4,
-            Instrument::Guitar => 5,
-            Instrument::Flute => 6,
-            Instrument::Bell => 7,
-            Instrument::Chime => 8,
-            Instrument::Xylophone => 9,
-            Instrument::IronXylophone => 10,
-            Instrument::CowBell => 11,
-            Instrument::Didgeridoo => 12,
-            Instrument::Bit => 13,
-            Instrument::Banjo => 14,
-            Instrument::Pling => 15,
-            Instrument::Custom(id) => id,
-        }
-    }
-}
-
-impl From<i8> for Instrument {
-    fn from(id: i8) -> Self {
-        match id {
-            0 => Instrument::Piano,
-            1 => Instrument::DoubleBass,
-            2 => Instrument::BassDrum,
-            3 => Instrument::SnareDrum,
-            4 => Instrument::Click,
-            5 => Instrument::Guitar,
-            6 => Instrument::Flute,
-            7 => Instrument::Bell,
-            8 => Instrument::Chime,
-            9 => Instrument::Xylophone,
-            10 => Instrument::IronXylophone,
-            11 => Instrument::CowBell,
-            12 => Instrument::Didgeridoo,
-            13 => Instrument::Bit,
-            14 => Instrument::Banjo,
-            15 => Instrument::Pling,
-            _ => Instrument::Custom(id),
+            Instrument::Custom(id) | Instrument::Vannila(id) => id,
         }
     }
 }
@@ -89,7 +51,7 @@ impl CustomInstruments {
         }
     }
 
-    pub fn decode<R>(reader: &mut R) -> Result<CustomInstruments, NbsError>
+    pub fn decode<R>(reader: &mut R, header: &Header) -> Result<CustomInstruments, NbsError>
     where
         R: crate::ReadStringExt,
     {
@@ -98,8 +60,8 @@ impl CustomInstruments {
             instruments: Vec::with_capacity(instrument_count as usize),
         };
         for id in 0..instrument_count {
-            // we don't want to overlap with vannila instruments, so we add +16
-            let instrument = Instrument::Custom(id + 16);
+            // We don't want to overlap with vannila instruments.
+            let instrument = Instrument::Custom(id + header.vannila_instrument_count()?);
             let name = reader.read_string()?;
             let file_name = reader.read_string()?;
             let pitch = reader.read_i8()?;

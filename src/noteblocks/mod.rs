@@ -59,7 +59,13 @@ impl NoteBlocks {
                     break;
                 }
                 layer += jumps;
-                let instrument = Instrument::from(reader.read_i8()?);
+                let instrument = reader.read_i8()?;
+
+                let instrument = if instrument >= header.vannila_instrument_count()? {
+                    Instrument::Custom(instrument)
+                } else {
+                    Instrument::Vannila(instrument)
+                };
                 let key = reader.read_i8()?;
                 let velocity = if header.format.version() >= 4 {
                     Some(reader.read_i8()?)
@@ -99,8 +105,8 @@ impl NoteBlocks {
             if header.format.version() >= 4 {
                 (*layer).locked = Some(reader.read_i8()? == 1);
             }
+            (*layer).volume = reader.read_i8()?;
             if header.format.version() >= 2 {
-                (*layer).volume = Some(reader.read_i8()?);
                 (*layer).stereo = Some(reader.read_i8()?);
             }
         }
@@ -116,8 +122,8 @@ impl NoteBlocks {
             let h_jumps = note_index - h_cursor;
             let mut has_jumped_h = false;
             for (layer_index, layer) in self.layers.iter().enumerate() {
-                let v_jumps = (layer_index as i16) - v_cursor;
                 if layer.notes.contains_key(&note_index) {
+                    let v_jumps = (layer_index as i16) - v_cursor;
                     let note = layer.notes.get(&note_index).unwrap();
                     if !has_jumped_h {
                         writer.write_i16::<LittleEndian>(h_jumps)?;
@@ -129,10 +135,10 @@ impl NoteBlocks {
                     writer.write_i8(note.instrument.into())?;
                     writer.write_i8(note.key)?;
                     if format.version() >= 4 {
-                        writer.write_i8(note.velocity.ok_or(NbsError::InvalidTargetFormat)?)?;
-                        writer.write_i8(note.panning.ok_or(NbsError::InvalidTargetFormat)?)?;
+                        writer.write_i8(note.velocity.ok_or(NbsError::InvalidFormat)?)?;
+                        writer.write_i8(note.panning.ok_or(NbsError::InvalidFormat)?)?;
                         writer.write_i16::<LittleEndian>(
-                            note.pitch.ok_or(NbsError::InvalidTargetFormat)?,
+                            note.pitch.ok_or(NbsError::InvalidFormat)?,
                         )?;
                     }
                 }
@@ -147,15 +153,15 @@ impl NoteBlocks {
             let layer = self.layers.get(layer_index).unwrap();
             writer.write_string(&layer.name)?;
             if format.version() >= 4 {
-                writer.write_i8(if layer.locked.ok_or(NbsError::InvalidTargetFormat)? {
+                writer.write_i8(if layer.locked.ok_or(NbsError::InvalidFormat)? {
                     1
                 } else {
                     0
                 })?;
             }
+            writer.write_i8(layer.volume)?;
             if format.version() >= 2 {
-                writer.write_i8(layer.volume.ok_or(NbsError::InvalidTargetFormat)?)?;
-                writer.write_i8(layer.stereo.ok_or(NbsError::InvalidTargetFormat)?)?;
+                writer.write_i8(layer.stereo.ok_or(NbsError::InvalidFormat)?)?;
             }
         }
         Ok(())
