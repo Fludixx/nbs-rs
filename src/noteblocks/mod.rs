@@ -64,7 +64,7 @@ impl NoteBlocks {
                 let instrument = if instrument >= header.vannila_instrument_count()? {
                     Instrument::Custom(instrument)
                 } else {
-                    Instrument::Vannila(instrument)
+                    Instrument::Vanilla(instrument)
                 };
                 let key = reader.read_i8()?;
                 let velocity = if header.format.version() >= 4 {

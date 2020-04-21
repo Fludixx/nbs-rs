@@ -1,25 +1,25 @@
 use crate::{header::Header, NbsError};
 
-pub const PIANO: Instrument = Instrument::Vannila(0);
-pub const DOUBLE_BASS: Instrument = Instrument::Vannila(1);
-pub const BASS_DRUM: Instrument = Instrument::Vannila(2);
-pub const SNARE_DRUM: Instrument = Instrument::Vannila(3);
-pub const CLICK: Instrument = Instrument::Vannila(4);
-pub const GUITAR: Instrument = Instrument::Vannila(5);
-pub const FLUTE: Instrument = Instrument::Vannila(6);
-pub const BELL: Instrument = Instrument::Vannila(7);
-pub const CHIME: Instrument = Instrument::Vannila(8);
-pub const XYLOPHONE: Instrument = Instrument::Vannila(9);
-pub const IRON_XYLOPHONE: Instrument = Instrument::Vannila(10);
-pub const COW_BELL: Instrument = Instrument::Vannila(11);
-pub const DIDGERIDOO: Instrument = Instrument::Vannila(12);
-pub const BIT: Instrument = Instrument::Vannila(13);
-pub const BANJO: Instrument = Instrument::Vannila(14);
-pub const PLING: Instrument = Instrument::Vannila(15);
+pub const PIANO: Instrument = Instrument::Vanilla(0);
+pub const DOUBLE_BASS: Instrument = Instrument::Vanilla(1);
+pub const BASS_DRUM: Instrument = Instrument::Vanilla(2);
+pub const SNARE_DRUM: Instrument = Instrument::Vanilla(3);
+pub const CLICK: Instrument = Instrument::Vanilla(4);
+pub const GUITAR: Instrument = Instrument::Vanilla(5);
+pub const FLUTE: Instrument = Instrument::Vanilla(6);
+pub const BELL: Instrument = Instrument::Vanilla(7);
+pub const CHIME: Instrument = Instrument::Vanilla(8);
+pub const XYLOPHONE: Instrument = Instrument::Vanilla(9);
+pub const IRON_XYLOPHONE: Instrument = Instrument::Vanilla(10);
+pub const COW_BELL: Instrument = Instrument::Vanilla(11);
+pub const DIDGERIDOO: Instrument = Instrument::Vanilla(12);
+pub const BIT: Instrument = Instrument::Vanilla(13);
+pub const BANJO: Instrument = Instrument::Vanilla(14);
+pub const PLING: Instrument = Instrument::Vanilla(15);
 
 #[derive(Debug, Clone, Copy)]
 pub enum Instrument {
-    Vannila(i8),
+    Vanilla(i8),
     Custom(i8),
 }
 
@@ -35,7 +35,7 @@ impl Instrument {
 impl Into<i8> for Instrument {
     fn into(self) -> i8 {
         match self {
-            Instrument::Custom(id) | Instrument::Vannila(id) => id,
+            Instrument::Custom(id) | Instrument::Vanilla(id) => id,
         }
     }
 }
