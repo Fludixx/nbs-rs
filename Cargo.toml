@@ -5,7 +5,7 @@ authors = ["fludixx <fludixs@protonmail.com>"]
 edition = "2018"
 readme = "README.md"
 repository = "https://github.com/Fludixx/nbs-rs"
-documentation = "https://docs.rs/nbs-rs/0.1.0/nbs"
+documentation = "https://docs.rs/nbs-rs"
 description = "NBS buffer decoder & encoder"
 license = "MIT"
 
